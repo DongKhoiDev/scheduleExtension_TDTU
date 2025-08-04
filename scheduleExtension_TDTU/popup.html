@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 320px;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4285f4;
+        }
+
+        .form-group input.invalid {
+            border-color: #ff0000;
+        }
+
+        #exportBtn {
+            width: 100%;
+            padding: 12px;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        #exportBtn:hover {
+            background: #3367d6;
+        }
+
+        #exportBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        #openCalendarBtn {
+            width: 100%;
+            padding: 12px;
+            background: #34a853;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        #openCalendarBtn:hover {
+            background: #2e8b3e;
+        }
+
+        #openCalendarBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .info {
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #007700;
+        }
+    </style>
+</head>
+
+
+<body>
+    <div class="form-group">
+        <h1>
+            <label for="semesterStart">Chọn ngày bắt đầu tuần 1 (Thứ 2):</label>
+            <label for="semesterStart">HK1 - 2025: 11/08/2025</label>
+            <input type="text" id="semesterStart" placeholder="dd/mm/yyyy" pattern="\d{2}/\d{2}/\d{4}" />
+
+        </h1>
+    </div>
+
+    <button id="exportBtn">Xuất lịch học (.ics)</button>
+
+    <button id="openCalendarBtn">📅 Mở Google Calendar để Import</button>
+
+    <div id="status" class="status"></div>
+
+    <div
+        style="margin-top: 15px; padding: 10px; background: #f0f8ff; border-radius: 4px; font-size: 12px; color: #666;">
+        <strong>💡 Hướng dẫn sử dụng:</strong><br>
+        1. Mở thời khóa biểu TỔNG QUÁT <br>
+        2. Chọn ngày bắt đầu tuần 1 (Thứ 2) của kỳ <br>
+        3. Nhấn nút "Xuất lịch học" để tải file tkb.ics<br>
+        4. Vào Google Calendar → ⚙️ Settings → Import & Export<br>
+        5. Chọn "Import" → Chọn file tkb.ics đã tải<br>
+        6. Hoàn thành! 🎉
+    </div>
+    <b style="color:tomato">
+        *Mỗi kỳ sẽ khác ngày bắt đầu
+    </b>
+    <br>
+    <label for="semesterStart">😘Nếu bạn cần hỗ trợ, đừng ngại inbox qua gmail:</label>
+    <a href="https://mail.google.com/mail/u/0/?ogbl#inbox?compose=jrjtXVZgVMfBFlTvTsZBcCzVnSWGSFShxtbkGgQkVHFtQwrHFWkCLnBPXBXCflcrKkJlrMJH"
+        target="_blank">dongkhoidev@gmail.com</a> <br>
+    <!-- <a>Sản phẩm hoàn toàn miễn phí, bạn vẫn có thể ủng hộ mình🥳</a> <br>
+    <img src="image.png" style="width: 120px;"> -->
+    <script src="popup.js"></script>
+</body>
+
+</html>
