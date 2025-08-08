@@ -86,14 +86,69 @@ function parseCourseInfo(text) {
         const cleanText = text.replace(/\|/g, '\n').replace(/\s+/g, ' ').trim();
         const lines = cleanText.split('\n').map(line => line.trim()).filter(line => line);
 
+        // Thử tìm trực tiếp từ text gốc cũng nếu việc split không hiệu quả
+        const originalText = text.trim();
+
         let courseName = '';
         let courseCode = '';
         let periods = '';
         let room = '';
+        let group = '';
+        let team = '';
         let weekPattern = '';
+
+        // Thử parse trực tiếp từ text gốc trước
+        // Kiểm tra nếu phòng để trống như "(Phòng:|Room: )"
+        const emptyRoomMatch = originalText.match(/\(.*?(?:Phòng|Room)[\s\|]*:\s*\)/i);
+        if (emptyRoomMatch) {
+            room = ''; // Phòng trống
+        } else {
+            // Cải thiện regex để bắt được tên phòng - tách riêng hai trường hợp
+            let directRoomMatch = originalText.match(/Phòng[\s\|]*:\s*([A-Z0-9_][A-Z0-9\-\.\/\_]*)/i);
+            if (!directRoomMatch) {
+                directRoomMatch = originalText.match(/Room:\s*([A-Z0-9_][A-Z0-9\-\.\/\_]*)/i);
+            }
+            if (!directRoomMatch) {
+                directRoomMatch = originalText.match(/(?:Phòng|Room)[\s\|]*:\s*([^,\n\r\)\s]+)/i);
+            }
+            
+            if (directRoomMatch && directRoomMatch[1] && directRoomMatch[1].trim() !== '') {
+                room = directRoomMatch[1].trim();
+            }
+        }
+
+        const directPeriodMatch = originalText.match(/(?:Tiết|Period)[\s:]*([0-9]+)/i);
+        if (directPeriodMatch) {
+            periods = directPeriodMatch[1];
+        }
+
+        const directWeekMatch = originalText.match(/(?:Tuần học|Week)[\s:]*([0-9\-]+)/i);
+        if (directWeekMatch) {
+            weekPattern = directWeekMatch[1];
+        }
+
+        // Thêm parsing trực tiếp cho nhóm và tổ
+        const directGroupMatch = originalText.match(/(?:Nhóm|Group)[\s\|]*:\s*(\d+)/i);
+        if (directGroupMatch) {
+            group = directGroupMatch[1];
+        }
+
+        const directTeamMatch = originalText.match(/(?:Tổ|Sub-group)[\s\|]*:\s*(\d+)/i);
+        if (directTeamMatch) {
+            team = directTeamMatch[1];
+        }
+
+        // Debug: Log toàn bộ text để kiểm tra
+        console.log('Full text:', cleanText);
+        console.log('Original text:', originalText);
+        console.log('Room from direct parsing:', room);
+        // console.log('Lines:', lines);
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
+
+            // Debug: Log từng dòng để kiểm tra
+            // console.log(`Line ${i}: "${line}"`);
 
             // Tên môn học (dòng đầu tiên thường là tên môn)
             if (i === 0 && !courseName) {
@@ -114,29 +169,64 @@ function parseCourseInfo(text) {
                 courseName = cleanCourseName.trim();
             }
 
-            // Mã môn học - tìm pattern (XXXXX - Nhóm)
-            if (line.includes('Nhóm') || line.includes('Group')) {
+            // Mã môn học - tìm pattern (XXXXX - Nhóm) và parse cả nhóm và tổ từ cùng dòng
+            if (line.includes('Nhóm') || line.includes('Group') || line.includes('Tổ') || line.includes('Sub-group')) {
+                // Parse mã môn học
                 const codeMatch = line.match(/\(([A-Z0-9]+)\s*-/);
                 if (codeMatch) {
                     courseCode = codeMatch[1];
                 }
+                
+                // Lấy thông tin nhóm - chỉ parse nếu chưa có từ direct parsing
+                if (!group) {
+                    const groupMatch = line.match(/(?:Nhóm|Group)[\s\|]*:\s*(\d+)/i);
+                    if (groupMatch) {
+                        group = groupMatch[1];
+                    }
+                }
+                
+                // Lấy thông tin tổ - chỉ parse nếu chưa có từ direct parsing
+                if (!team) {
+                    const teamMatch = line.match(/(?:Tổ|Sub-group)[\s\|]*:\s*(\d+)/i);
+                    if (teamMatch) {
+                        team = teamMatch[1];
+                    }
+                }
             }
 
-            // Tiết học - tìm pattern "Tiết" hoặc "Period:" - FIX: Xử lý đúng các tiết liền kề
-            if (line.includes('Tiết') || line.includes('Period:')) {
-                const periodMatch = line.match(/(?:Tiết|Period:)\s*(\d+)/);
-                const roomMatch = line.match(/Phòng:|Room:\s*([A-Z0-9\-]+)/);
-
+            // Tiết học - chỉ parse nếu chưa có từ direct parsing
+            if (!periods && (line.includes('Tiết') || line.includes('Period:'))) {
+                // Tìm từ "Tiết" hoặc "Period:" và lấy tất cả số theo sau
+                const periodMatch = 
+                    line.match(/(?:Tiết|Period:)\s*([0-9]+)/i) ||
+                    line.match(/(?:Tiết|Period)\s*([0-9]+)/i);
                 if (periodMatch) {
-                    periods = periodMatch[1]; // Giữ nguyên chuỗi tiết gốc
-                }
-                if (roomMatch) {
-                    room = roomMatch[1];
+                    periods = periodMatch[1];
                 }
             }
 
-            // Tuần học - tìm pattern "Tuần học" hoặc "Week:"
-            if (line.includes('Tuần học') || line.includes('Week:')) {
+            // Phòng học - chỉ parse nếu chưa có từ direct parsing
+            if (!room && (line.includes('Phòng') || line.includes('Room'))) {
+                // Thử nhiều pattern khác nhau cho format "Phòng:|Room: HT_6B"
+                let roomMatch = 
+                    line.match(/(?:Phòng|Room)[\s\|]*:\s*([A-Z0-9_][A-Z0-9\-\.\/\_]*)/i) ||
+                    line.match(/(?:Phòng|Room)[\s\|]*:\s*([^,\n\r\)\s]+)/i) ||
+                    line.match(/(?:Phòng|Room)[\s:]*([A-Z0-9_][A-Z0-9\-\.\/\_\s]*)/i);
+                
+                if (roomMatch) {
+                    let roomValue = roomMatch[1].trim();
+                    // Loại bỏ các ký tự không mong muốn
+                    roomValue = roomValue.replace(/[,;].*$/, '').trim();
+                    
+                    // Chỉ gán nếu có giá trị thực và không phải chỉ là khoảng trắng hoặc dấu ngoặc đóng
+                    if (roomValue && roomValue !== '' && roomValue !== ')' && roomValue.length > 0) {
+                        room = roomValue;
+                    }
+                }
+            }
+
+            // Tuần học - chỉ parse nếu chưa có từ direct parsing
+            if (!weekPattern && (line.includes('Tuần học') || line.includes('Week:'))) {
                 const weekMatch = line.match(/(?:Tuần học|Week:)\s*([0-9\-]+)/);
                 if (weekMatch) {
                     weekPattern = weekMatch[1];
@@ -168,16 +258,24 @@ function parseCourseInfo(text) {
 
 
         if (!courseName || !periods || !weekPattern) {
+            // console.log('Missing required info:', { courseName, periods, weekPattern });
             return null;
         }
 
-        return {
+        const result = {
             courseName,
             courseCode,
             periods,
-            room,
+            room: room || '', // Đảm bảo không bị undefined
+            group,
+            team,
             weekPattern
         };
+        
+        // Debug: Log kết quả parse
+        console.log('Parsed course info:', result);
+        
+        return result;
     } catch (error) {
         console.error('Error parsing course info:', error, text);
         return null;
@@ -208,7 +306,7 @@ function getDayOfWeekFromCell(cell) {
 
 function createEventsForWeeks(courseInfo, dayOfWeek) {
     const events = [];
-    const { courseName, courseCode, periods, room, weekPattern } = courseInfo;
+    const { courseName, courseCode, periods, room, group, team, weekPattern } = courseInfo;
 
     // Parse các tiết học - FIX: Xử lý đúng chuỗi tiết
     const periodNumbers = [];
@@ -298,10 +396,21 @@ function createEventsForWeeks(courseInfo, dayOfWeek) {
                 const startDateTime = new Date(year, month - 1, day, startHour, startMinute);
                 const endDateTime = new Date(year, month - 1, day, endHour, endMinute);
 
+                // Tạo description với đầy đủ thông tin
+                let description = `Mã môn: ${courseCode}`;
+                if (group) description += `\\nNhóm: ${group}`;
+                if (team) description += `\\nTổ: ${team}`;
+                if (room && room.trim()) {
+                    description += `\\nPhòng: ${room}`;
+                } else {
+                    description += `\\nPhòng: Chưa xác định`;
+                }
+                description += `\\nTiết: ${periods}`;
+
                 events.push({
                     title: courseName,
-                    description: `Mã môn: ${courseCode}\\nPhòng: ${room}\\nTiết: ${periods}`,
-                    location: room,
+                    description: description,
+                    location: room || 'Chưa xác định',
                     startDateTime: startDateTime,
                     endDateTime: endDateTime
                 });
