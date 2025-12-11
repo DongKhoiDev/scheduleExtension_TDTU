@@ -6,7 +6,7 @@ Extension Chrome đơn giản để xuất lịch học từ trang web TDTU sang
 
 1. Mở trang lịch học TDTU
 2. Click vào icon extension
-3. Chọn ngày bắt đầu tuần 1 (Thứ 2) của học kỳ
+3. Chọn ngày bắt đầu tuần đầu tiên (Thứ 2) của học kỳ
 4. Nhấn nút "Xuất lịch học (.ics)"
 5. File `tkb.ics` sẽ được tải về, import vào Google Calendar
 
@@ -19,7 +19,8 @@ Extension Chrome đơn giản để xuất lịch học từ trang web TDTU sang
 
 ## ⚠️ Lưu ý
 
-- Chọn đúng ngày Thứ 2 của tuần 1 trong học kỳ để lịch hiển thị chính xác
+- Chọn đúng ngày Thứ 2 của tuần đầu tiên trong học kỳ để lịch hiển thị chính xác
+- VD: Ngày bắt đầu kỳ 2 là 29/12/2025
 - Extension tự động lưu ngày bắt đầu đã chọn
 
 ## 📁 Files

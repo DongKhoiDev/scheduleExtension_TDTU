@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const now = new Date();
     const currentYear = now.getFullYear();
     const defaultStart = new Date(currentYear, 7, 12); // August 12 as default
-    const defaultDateString = `${currentYear}-08-12`;
+    const defaultDateString = `${currentYear}-12-29`;
     semesterStartInput.value = formatDateToDisplay(defaultDateString);
     
     // Load saved date if exists
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             // Validate input format first
             if (!validateDateFormat(semesterStartInput.value)) {
-                throw new Error('Vui lòng nhập ngày theo định dạng dd/mm/yyyy (ví dụ: 12/08/2024)');
+                throw new Error('Vui lòng nhập ngày theo định dạng dd/mm/yyyy (ví dụ: 29/12/2025)');
             }
             
             // Lấy tab hiện tại
