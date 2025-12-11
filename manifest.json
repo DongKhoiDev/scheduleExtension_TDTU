@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Xuất lịch học TDTU",
+  "version": "1.0",
+  "description": "Extension đơn giản để xuất lịch học từ TDTU sang Google Calendar",
+  "permissions": [
+    "activeTab",
+    "downloads", 
+    "storage",
+    "tabs"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://lichhoc-lichthi.tdtu.edu.vn/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Xuất lịch học",
+    "default_icon": "icon48.png"
+  },
+  "icons": {
+    "16": "icon48.png",
+    "48": "icon48.png",
+    "128": "icon48.png"
+  }
+}
